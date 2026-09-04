@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+# run.sh: Website syncen (rclone) + SSH-Reverse-Tunnel starten.
+# Flags: --sync-only | --tunnel-only | (default: beides)
+set -euo pipefail
+cd "$(dirname "$0")"
+[ -f .env ] || { echo ".env fehlt -> ./setup.sh"; exit 1; }
+# shellcheck disable=SC1091
+source .env
+
+SSH_OPTS="-o ControlMaster=auto -o ControlPath=/tmp/ssh-code-%r@%h:%p -o ControlPersist=60 -o ServerAliveInterval=30 -o ServerAliveCountMax=3 -o ExitOnForwardFailure=yes"
+TARGET="${SSH_TARGET:-root@reisinger.pictures}"
+PORT="${SSH_PORT:-22}"
+REMOTE="${REMOTE_PORT:-18731}"
+LOCAL="${LOCAL_PORT:-8080}"
+DIST="${LOCAL_DIST:-apps/web/dist}"
+REMOTE_PATH="${RCLONE_REMOTE:-reisinger.pictures}:${RCLONE_PATH:-/code.all-the.rest}"
+
+MODE="${1:-all}"
+if [ "$MODE" != "--tunnel-only" ]; then
+  echo "Sync $DIST -> $REMOTE_PATH ..."
+  rclone sync "$DIST" "$REMOTE_PATH" --transfers=20 --track-renames --progress
+  echo "Sync ok."
+fi
+if [ "$MODE" != "--sync-only" ]; then
+  echo "Tunnel: 127.0.0.1:$REMOTE (VPS) <- 127.0.0.1:$LOCAL (Mac) via $TARGET:$PORT"
+  echo "Master-Connection oeffnen (1x Passphrase), dann Tunnel..."
+  ssh $SSH_OPTS -fN -p "$PORT" "$TARGET"
+  if command -v autossh >/dev/null 2>&1; then
+    AUTOSSH_PORT=0 autossh -M 0 -N $SSH_OPTS -p "$PORT" \
+      -R "127.0.0.1:$REMOTE:127.0.0.1:$LOCAL" "$TARGET"
+  else
+    echo "WARN: autossh fehlt (brew install autossh), nutze plain ssh."
+    ssh $SSH_OPTS -N -p "$PORT" -R "127.0.0.1:$REMOTE:127.0.0.1:$LOCAL" "$TARGET"
+  fi
+fi

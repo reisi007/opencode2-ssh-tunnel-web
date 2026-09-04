@@ -1,0 +1,34 @@
+# Portainer-Stack: NUR code-auth. Kein zweites Caddy (zentrales Caddy bleibt).
+# Deploy: Portainer -> Stacks -> Add stack -> Web editor, dazu auth.py als
+# Stack-Datei hochladen bzw. per SFTP nach /portainer/stacks/code-auth/.
+# Env aus .env uebernehmen (AUTH_USER/AUTH_HASH/AUTH_SECRET).
+services:
+  code-auth:
+    image: python:3.11-slim
+    container_name: code-auth
+    restart: unless-stopped
+    networks:
+      webnet:
+        ipv4_address: ${AUTH_IP:-172.18.0.60}
+    environment:
+      - AUTH_USER=${AUTH_USER:-admin}
+      - AUTH_HASH=${AUTH_HASH}
+      - AUTH_SECRET=${AUTH_SECRET}
+      - SESSION_TTL=${SESSION_TTL:-43200}
+      - AUTH_PORT=8081
+    volumes:
+      - ./auth.py:/app/auth.py:ro
+    # bcrypt nur installieren wenn AUTH_HASH ein caddy-bcrypt-Hash ($2...) ist,
+    # sonst Stdlib-PBKDF2 ohne pip.
+    command: >
+      sh -c "case \"$AUTH_HASH\" in '\\$2*') pip install --no-cache-dir bcrypt >/dev/null 2>&1 ;; esac;
+      python3 /app/auth.py"
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8081/health')"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+networks:
+  webnet:
+    external: true

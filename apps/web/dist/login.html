@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KI-Zugang</title>
+<style>
+body{font-family:sans-serif;background:#121212;color:#fff;display:flex;justify-content:center;align-items:center;height:100vh;margin:0}
+.card{background:#1e1e1e;padding:2rem;border-radius:8px;box-shadow:0 4px 10px rgba(0,0,0,.3);width:300px}
+input{width:100%;padding:10px;margin:10px 0;border:1px solid #333;background:#252525;color:#fff;border-radius:4px;box-sizing:border-box}
+button{width:100%;padding:10px;background:#007acc;border:none;color:#fff;font-weight:bold;border-radius:4px;cursor:pointer}
+button:hover{background:#005999}
+button:disabled{opacity:.5;cursor:wait}
+#error{color:#ff6b6b;font-size:.9rem;margin-top:10px;display:none}
+</style>
+</head>
+<body>
+<div class="card">
+<h2>KI-Zugang</h2>
+<form id="f">
+<input type="text" id="username" placeholder="Benutzername" autocomplete="username" required>
+<input type="password" id="password" placeholder="Passwort" autocomplete="current-password" required>
+<button type="submit" id="btn">Anmelden</button>
+</form>
+<div id="error">Zugangsdaten falsch!</div>
+</div>
+<script>
+(async () => {
+  try {
+    const r = await fetch('/api/me', {cache: 'no-store'});
+    if (r.ok) window.location.href = '/';
+  } catch {}
+})();
+document.getElementById('f').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const btn = document.getElementById('btn');
+  const err = document.getElementById('error');
+  err.style.display = 'none'; btn.disabled = true;
+  const res = await fetch('/api/login', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({
+      username: document.getElementById('username').value,
+      password: document.getElementById('password').value
+    })
+  });
+  if (res.ok) window.location.href = '/';
+  else { err.style.display = 'block'; btn.disabled = false; }
+});
+</script>
+</body>
+</html>

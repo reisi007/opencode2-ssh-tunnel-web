@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!-- Beispiel: ~/Library/LaunchAgents/com.code-tunnel.plist
+     Pfad zu run.sh anpassen, dann: launchctl load ~/Library/LaunchAgents/com.code-tunnel.plist -->
+<plist version="1.0">
+<dict>
+  <key>Label</key><string>com.code-tunnel</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/Users/florianreisinger/dev/opencode2-ssh-tunnel-web/run.sh</string>
+    <string>--tunnel-only</string>
+  </array>
+  <key>RunAtLoad</key><true/>
+  <key>KeepAlive</key><true/>
+  <key>StandardOutPath</key><string>/tmp/code-tunnel.log</string>
+  <key>StandardErrorPath</key><string>/tmp/code-tunnel.log</string>
+</dict>
+</plist>
