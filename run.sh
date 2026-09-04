@@ -17,9 +17,7 @@ REMOTE_PATH="${RCLONE_REMOTE:-reisinger.pictures}:${RCLONE_PATH:-/code.all-the.r
 
 MODE="${1:-all}"
 if [ "$MODE" != "--tunnel-only" ]; then
-  echo "Sync $DIST -> $REMOTE_PATH ..."
-  rclone sync "$DIST" "$REMOTE_PATH" --transfers=20 --track-renames --progress
-  echo "Sync ok."
+  ./sync.sh
 fi
 if [ "$MODE" != "--sync-only" ]; then
   # Optional: OpenCode-Web lokal starten wenn LOCAL_PORT zu ist (OPENCODE_CMD in .env, sonst nur Warnung)
