@@ -33,6 +33,7 @@ docker run --rm caddy:2 caddy hash-password --plaintext 'DEIN_PASSWORT'
 ./diagnose.sh         # Checks lokal + VPS (1x Passphrase)
 ./run.sh              # rclone-Sync + Tunnel; Flags: --sync-only / --tunnel-only
 ./diagnose.sh --quick # nur lokal
+# Am Mac alternativ Doppelklick auf start-tunnel.command (macht run.sh im Terminal auf)
 ```
 
 SSH läuft immer über **eine** Master-Connection (`ControlMaster auto`, `ControlPersist 60` zu `root@reisinger.pictures:22`), daher trotz passwortgeschütztem Key nur 1x Passphrase.
