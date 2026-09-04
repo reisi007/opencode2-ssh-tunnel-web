@@ -13,7 +13,7 @@ Browser -> code.all-the.rest (zentrales Caddy)
   401 -> 302 /login.html (nie WWW-Authenticate -> nie Popup)
 ```
 
-Kein zweites Caddy (Ports 80/443 sind belegt), kein Flask/Gunicorn — `stack/auth.py` nutzt nur Stdlib + optional `bcrypt`.
+Kein zweites Caddy (Ports 80/443 sind belegt), kein Flask/Gunicorn — das eingebettete Python nutzt nur Stdlib + optional `bcrypt`.
 
 ## Credentials Single-User (lokal via Docker-Caddy)
 
@@ -39,7 +39,7 @@ SSH läuft immer über **eine** Master-Connection (`ControlMaster auto`, `Contro
 
 ## Portainer-Deploy
 
-1. Portainer → Stacks → Add stack `code-auth`, Inhalt von `stack/docker-compose.yml`, dazu `stack/auth.py` als `./auth.py` neben die Compose-Datei legen (SFTP).
+1. Portainer → Stacks → Add stack `code-auth`, Inhalt von `stack/docker-compose.yml` in den Web-Editor pasten (Single File, alles inline).
 2. Env aus `.env` übernehmen (`AUTH_USER/AUTH_HASH/AUTH_SECRET/SESSION_TTL/AUTH_IP`).
 3. Starten. `code-auth` hängt im externen `webnet` (Default `172.18.0.60`, Block nach `.55` countdown / `.253` ftp — vorher `docker network inspect webnet` prüfen).
 

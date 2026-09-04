@@ -21,7 +21,10 @@ echo "== lokal =="
 command -v autossh >/dev/null 2>&1 && ok "autossh vorhanden" || warn "autossh fehlt (brew install autossh)"
 (echo >/dev/tcp/127.0.0.1/"$LOCAL") >/dev/null 2>&1 && ok "localhost:$LOCAL lauscht (OpenCode?)" \
   || warn "localhost:$LOCAL nicht erreichbar -> OpenCode-Web starten?"
-python3 -c "import py_compile; py_compile.compile('stack/auth.py', doraise=True)" && ok "auth.py kompiliert"
+sed -n '/cat > \/app\/auth.py << "PYEOF"/,/^        PYEOF$/p' stack/docker-compose.yml \
+  | sed '1d;$d' | sed 's/^        //' | sed 's/\$\$/\$/g' > /tmp/auth-inline-check.py
+python3 -c "import py_compile; py_compile.compile('/tmp/auth-inline-check.py', doraise=True)" \
+  && ok "Inline-auth.py kompiliert"
 
 [ "$QUICK" = "--quick" ] && exit 0
 
