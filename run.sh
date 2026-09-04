@@ -22,6 +22,21 @@ if [ "$MODE" != "--tunnel-only" ]; then
   echo "Sync ok."
 fi
 if [ "$MODE" != "--sync-only" ]; then
+  # Optional: OpenCode-Web lokal starten wenn LOCAL_PORT zu ist (OPENCODE_CMD in .env, sonst nur Warnung)
+  if ! (echo >/dev/tcp/127.0.0.1/"$LOCAL") >/dev/null 2>&1; then
+    if [ -n "${OPENCODE_CMD:-}" ]; then
+      echo "Starte OpenCode-Web: $OPENCODE_CMD"
+      $OPENCODE_CMD >>/tmp/code-tunnel-opencode.log 2>&1 &
+      for _ in $(seq 1 15); do
+        (echo >/dev/tcp/127.0.0.1/"$LOCAL") >/dev/null 2>&1 && break
+        sleep 1
+      done
+      (echo >/dev/tcp/127.0.0.1/"$LOCAL") >/dev/null 2>&1 \
+        || { echo "FEHLER: OpenCode-Web lauscht nicht auf :$LOCAL (Log: /tmp/code-tunnel-opencode.log)"; exit 1; }
+    else
+      echo "WARN: localhost:$LOCAL nicht erreichbar -> OpenCode-Web selbst starten oder OPENCODE_CMD in .env setzen."
+    fi
+  fi
   echo "Tunnel: 127.0.0.1:$REMOTE (VPS) <- 127.0.0.1:$LOCAL (Mac) via $TARGET:$PORT"
   echo "Master-Connection oeffnen (1x Passphrase), dann Tunnel..."
   ssh $SSH_OPTS -fN -p "$PORT" "$TARGET"
