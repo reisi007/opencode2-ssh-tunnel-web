@@ -1,6 +1,6 @@
 # Fragment: in /Users/florianreisinger/dev/caddyfile/Caddyfile einfuegen,
 # dann dort ./sync.sh (validate + reload). Nicht als eigenes Caddyfile nutzen.
-# Voraussetzung: Portainer-Stack code-auth laeuft (172.18.0.60:8081 im webnet),
+# Voraussetzung: Portainer-Stack code-auth laeuft (Name code-auth, :8081 im webnet),
 # SSH-Tunnel Mac -> VPS lauscht auf 127.0.0.1:18731 (siehe run.sh).
 code.all-the.rest {
 	import security_headers
@@ -14,18 +14,18 @@ code.all-the.rest {
 
 	# Login-API an Sidecar (setzt HMAC-Cookie)
 	handle /api/login {
-		reverse_proxy 172.18.0.60:8081
+		reverse_proxy code-auth:8081
 	}
 	handle /api/me {
-		reverse_proxy 172.18.0.60:8081
+		reverse_proxy code-auth:8081
 	}
 	handle /api/logout {
-		reverse_proxy 172.18.0.60:8081
+		reverse_proxy code-auth:8081
 	}
 
 	# alles andere: Cookie pruefen, dann SSH-Tunnel zum Mac
 	handle {
-		forward_auth 172.18.0.60:8081 {
+		forward_auth code-auth:8081 {
 			uri /check
 			copy_headers Remote-User
 		}
