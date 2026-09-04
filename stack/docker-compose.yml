@@ -207,6 +207,7 @@ services:
                 raise SystemExit("AUTH_HASH fehlt (siehe README: caddy hash-password)")
             fmt = "bcrypt" if AUTH_HASH.startswith("$$2") else ("pbkdf2" if AUTH_HASH.startswith("pbkdf2$$") else "klartext")
             print(f"Hash-Format: {fmt}, bcrypt-Modul: {'ok' if _bcrypt else 'FEHLT'}", flush=True)
+            print(f"AUTH_HASH-Laenge: {len(AUTH_HASH)} Zeichen (bcrypt=60, pbkdf2>100)", flush=True)
             print(f"code-auth lauscht auf :{LISTEN_PORT} als {AUTH_USER}", flush=True)
             ThreadingHTTPServer(("0.0.0.0", LISTEN_PORT), H).serve_forever()
         PYEOF
