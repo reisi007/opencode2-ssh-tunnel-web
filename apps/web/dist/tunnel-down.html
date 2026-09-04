@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tunnel offline</title>
+<style>
+body{font-family:sans-serif;background:#121212;color:#fff;display:flex;justify-content:center;align-items:center;height:100vh;margin:0}
+.card{background:#1e1e1e;padding:2rem;border-radius:8px;box-shadow:0 4px 10px rgba(0,0,0,.3);width:340px;text-align:center}
+.dot{display:inline-block;width:12px;height:12px;border-radius:50%;background:#ff6b6b;margin-right:8px}
+code{background:#252525;padding:2px 6px;border-radius:4px}
+button{width:100%;padding:10px;margin-top:14px;background:#007acc;border:none;color:#fff;font-weight:bold;border-radius:4px;cursor:pointer}
+button:hover{background:#005999}
+p{color:#bbb;font-size:.9rem;line-height:1.5}
+</style>
+</head>
+<body>
+<div class="card">
+<h2><span class="dot"></span>Tunnel offline</h2>
+<p>Login war erfolgreich, aber der Mac ist nicht erreichbar.<br>
+Bitte am Mac <code>start-tunnel.command</code> per Doppelklick starten (oder <code>./run.sh</code> im Terminal).</p>
+<button onclick="window.location.href='/'">Erneut versuchen</button>
+</div>
+</body>
+</html>

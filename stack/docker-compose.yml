@@ -205,12 +205,22 @@ services:
                 raise SystemExit("AUTH_SECRET fehlt")
             if not AUTH_HASH:
                 raise SystemExit("AUTH_HASH fehlt (siehe README: caddy hash-password)")
+            fmt = "bcrypt" if AUTH_HASH.startswith("$$2") else ("pbkdf2" if AUTH_HASH.startswith("pbkdf2$$") else "klartext")
+            print(f"Hash-Format: {fmt}, bcrypt-Modul: {'ok' if _bcrypt else 'FEHLT'}", flush=True)
             print(f"code-auth lauscht auf :{LISTEN_PORT} als {AUTH_USER}", flush=True)
             ThreadingHTTPServer(("0.0.0.0", LISTEN_PORT), H).serve_forever()
         PYEOF
         # bcrypt nur installieren wenn AUTH_HASH ein caddy-bcrypt-Hash ($$2...) ist,
-        # sonst Stdlib-PBKDF2 ohne pip.
-        case "$AUTH_HASH" in '$$2*') pip install --no-cache-dir bcrypt >/dev/null 2>&1 ;; esac
+        # sonst Stdlib-PBKDF2 ohne pip. Ausgabe NICHT unterdruecken, damit ein
+        # fehlgeschlagenes pip im Log sichtbar ist (statt mysterioeser 401er).
+        case "$AUTH_HASH" in '$$2*')
+          echo "bcrypt-Hash erkannt, installiere bcrypt-Modul..."
+          pip install --no-cache-dir bcrypt || echo "WARN: pip install bcrypt fehlgeschlagen -> Login liefert 401. Auf PBKDF2-Hash wechseln (README)."
+          ;;
+        *)
+          echo "Kein bcrypt-Hash erkannt (PBKDF2/Klartext), kein pip noetig."
+          ;;
+        esac
         exec python3 /app/auth.py
     healthcheck:
       test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8081/health')"]

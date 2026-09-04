@@ -15,16 +15,23 @@ Browser -> code.all-the.rest (zentrales Caddy)
 
 Kein zweites Caddy (Ports 80/443 sind belegt), kein Flask/Gunicorn — das eingebettete Python nutzt nur Stdlib + optional `bcrypt`.
 
-## Credentials Single-User (lokal via Docker-Caddy)
+## Credentials Single-User
 
-Hash erzeugen, Klartext nie committen:
+Hash erzeugen, Klartext nie committen. **Empfohlen: PBKDF2** (Stdlib, kein pip im Container nötig):
+
+```bash
+python3 -c "import hashlib,secrets,getpass; p=getpass.getpass('Passwort: '); s=secrets.token_hex(16); print('pbkdf2\$100000\$'+s+'\$'+hashlib.pbkdf2_hmac('sha256',p.encode(),bytes.fromhex(s),100000).hex())"
+# -> pbkdf2$100000$... als AUTH_HASH in .env / Portainer-Env eintragen (komplette Zeile, ohne Quotes)
+```
+
+Alternative via Docker-Caddy (bcrypt, Container installiert dann `pip install bcrypt` beim Start — Log prüfen):
 
 ```bash
 docker run --rm caddy:2 caddy hash-password --plaintext 'DEIN_PASSWORT'
-# -> $2a$14$... als AUTH_HASH in .env eintragen
+# -> $2a$14$... (60 Zeichen!) als AUTH_HASH eintragen
 ```
 
-`./setup.sh` macht das interaktiv (inkl. `AUTH_SECRET` via `openssl rand -hex 32`). Ohne Docker fällt es auf PBKDF2-Stdlib zurück (`pbkdf2$...`, kein pip nötig). Mit bcrypt-Hash installiert der Stack einmalig `pip install bcrypt` beim Start.
+`./setup.sh` macht das interaktiv (inkl. `AUTH_SECRET` via `openssl rand -hex 32`). Container-Log muss `Hash-Format: ..., bcrypt-Modul: ok/FEHLT` zeigen.
 
 ## Ablauf
 
